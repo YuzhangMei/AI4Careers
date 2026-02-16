@@ -7,7 +7,6 @@ import walkers.career_fair;
 import walkers.fit;
 import walkers.generate;
 
-# AppRoot 初始化（MVP）
 walker Init {
     can enter {
         root = AppRoot();
@@ -16,7 +15,6 @@ walker Init {
     }
 }
 
-# Admin seeding（MVP：写个简单 walker，真实版可以读 JSON/CSV）
 walker SeedDemoData {
     can enter with AppRoot entry {
         e = Event(event_id="ev_1", name="UMich Winter Career Fair", term="Winter 2026",
