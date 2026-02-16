@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+
+# Jaseci/Jac runtime
+.jaseci/
+.jac_tmp/
+*.log
+
+# Env
+.env
+venv/
+.venv/
+
+# OS
+.DS_Store
