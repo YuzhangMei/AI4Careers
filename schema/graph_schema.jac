@@ -1,7 +1,6 @@
 # schema/graph_schema.jac
-
 node AppRoot {
-    has app_name: str = "Career Fair Assistant";
+    has app_name: str = "AI4Career";
 }
 
 # ========== User & Auth ==========
@@ -11,7 +10,6 @@ node User {
     has password_hash: str;
     has name: str;
     has created_at: str;
-
     has needs_sponsorship: bool = false;
     has work_authorization: str = "";
     has preferred_locations: list[str] = [];
@@ -29,7 +27,6 @@ node Resume {
     has filename: str;
     has file_path: str;
     has uploaded_at: str;
-
     # extraction (MVP: store directly as fields; later you can normalize)
     has skills: list[str] = [];
     has experience_bullets: list[str] = [];
@@ -45,6 +42,7 @@ node Event {
     has start_date: str;
     has end_date: str;
 }
+
 edge HasCompany;
 edge HasRole;
 
@@ -61,7 +59,6 @@ node Role {
     has work_mode: str = "";
     has sponsorship: str = "Unknown";
     has description: str = "";
-
     # Optional structured metadata for filtering / keywords
     has tags: list[str] = [];
 }
@@ -74,16 +71,16 @@ node FitScore {
     has missing_skills: list[str] = [];
     has top_keywords: list[str] = [];
     has explanation: str = "";
-    has created_at: str;
+    has created_at: str = "";
 }
 
 node Artifact {
     has artifact_id: str;
-    has type: str;          # pitch | rewrite | cover_letter
+    has type: str;  # pitch | rewrite | cover_letter
     has role_id: str = "";
-    has content: str;
+    has content: str = "";
     has structured: dict = {};
     has model: str = "";
     has prompt_version: str = "v0";
-    has created_at: str;
+    has created_at: str = "";
 }
