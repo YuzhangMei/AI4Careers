@@ -6,7 +6,7 @@ import utils.parsing;
 walker ResumeUpload {
     has token: str;
     has filename: str;
-    has raw_text: str;   # MVP: 先传文本，后续再做文件上传
+    has raw_text: str;
 
     can enter with AppRoot entry {
         uid = security.token_to_user_id(self.token);
