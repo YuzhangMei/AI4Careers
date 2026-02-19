@@ -14,7 +14,7 @@ node User {
     has work_authorization: str = "";
     has preferred_locations: list[str] = [];
     has work_modes: list[str] = [];  # Remote/Hybrid/On-site
-    has role_types: list[str] = [];
+    has role_types: list[str] = [];  # User's preferred job categories, e.g. SWE/ML/Data/Quant/...
 }
 
 edge OwnsResume;  # One user can have multiple copies of resume
@@ -32,8 +32,9 @@ node Resume {
     has resume_id: str;
     has filename: str;
     has file_path: str;
-    has uploaded_at: str;
-    # extraction (MVP: store directly as fields; later you can normalize)
+    has uploaded_at: str;  # uploaded time
+    # extraction (MVP: store directly as fields; later to normalize)
+    # The following elements can be separated into a single node in the future
     has skills: list[str] = [];
     has experience_bullets: list[str] = [];
     has projects: list[str] = [];
@@ -51,24 +52,26 @@ node Event {
 
 edge HasCompany;  # Link an event to multiple companies
 
+
 edge HasRole;  # Link an event to multiple roles
 
 
 node Company {
     has company_id: str;
     has name: str;
-    has icon_url: str = "";
+    has icon_url: str = "";  # The form of icon may be changed later
 }
 
 node Role {
     has role_id: str;
     has title: str;
+    has category: str;
     has location: str = "";
     has work_mode: str = "";
     has sponsorship: str = "Unknown";
     has description: str = "";
     # Optional structured metadata for filtering / keywords
-    has tags: list[str] = [];
+    has tags: list[str] = [];  # Does tags conflict with caategory?
 }
 
 # ========== Fit & Artifacts ==========
@@ -79,17 +82,17 @@ node FitScore {
     has missing_skills: list[str] = [];
     has top_keywords: list[str] = [];
     has explanation: str = "";
-    has created_at: str = "";
+    has created_at: str = "";  # created time
 }
 
 # Artificially generated content
 node Artifact {
     has artifact_id: str;
-    has type: str;  # pitch | rewrite | cover_letter
-    has role_id: str = "";
+    has type: str;  # pitch | rewrite | cover_letter, etc.
+    has role_id: str = "";  # Record what this artifact aims for
     has content: str = "";
-    has structured: dict = {};
-    has model: str = "";
-    has prompt_version: str = "v0";
-    has created_at: str = "";
+    has structured: dict = {};  # Assistant tool for content; structralize the content for future analysis or rendering
+    has model: str = "";  # The type of the model that the artifact is generated from
+    has prompt_version: str = "v0";  # The prompt of the AI system; currently version 0, to be iterated further
+    has created_at: str = "";  # Created time
 }
