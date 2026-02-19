@@ -2,7 +2,7 @@
 import schema.graph_schema;
 import utils.security;
 
-walker Me {
+walker: pub Me {
     has token: str;
 
     can enter with AppRoot entry {
@@ -29,7 +29,7 @@ walker Me {
     }
 }
 
-walker UpdatePreferences {
+walker: pub UpdatePreferences {
     has token: str;
     has needs_sponsorship: bool;
     has work_authorization: str;

@@ -3,7 +3,7 @@ import schema.graph_schema;
 import utils.security;
 import utils.llm;
 
-walker GeneratePitch {
+walker: pub GeneratePitch {
     has token: str;
     has role_id: str;
     has style: str = "career_fair";
@@ -53,7 +53,7 @@ walker GeneratePitch {
     }
 }
 
-walker RewriteResumeForRole {
+walker: pub RewriteResumeForRole {
     has token: str;
     has role_id: str;
 
