@@ -1,7 +1,7 @@
 # walkers/career_fair.jac
 import schema.graph_schema;
 
-walker ListEvents {
+walker: pub ListEvents {
     can enter with AppRoot entry {
         out: list[dict] = [];
         for e in [-->] :Event {
@@ -17,7 +17,7 @@ walker ListEvents {
     }
 }
 
-walker ListRoles {
+walker: pub ListRoles {
     has event_id: str;
     has location: str = "";
     has work_mode: str = "";

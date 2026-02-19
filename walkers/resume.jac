@@ -3,7 +3,7 @@ import schema.graph_schema;
 import utils.security;
 import utils.parsing;
 
-walker ResumeUpload {
+walker: pub ResumeUpload {
     has token: str;
     has filename: str;
     has raw_text: str;
@@ -30,13 +30,15 @@ walker ResumeUpload {
             education=ext["education"]
         );
 
+        # From the user node (me), create an edge named
+        # OwnsResume to the resume node
         me ++> OwnsResume() ++> res;
 
         report {"resume_id": rid, "status": "parsed", "extraction_summary": {"skills_count": len(res.skills)}};
     }
 }
 
-walker GetResume {
+walker: pub GetResume {
     has token: str;
     has resume_id: str;
 

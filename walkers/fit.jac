@@ -2,7 +2,7 @@
 import schema.graph_schema;
 import utils.security;
 
-walker FitScoreRole {
+walker: pub FitScoreRole {
     has token: str;
     has role_id: str;
 
