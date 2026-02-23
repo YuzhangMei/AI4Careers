@@ -10,6 +10,7 @@ walker: pub GeneratePitch {
     has length: str = "short";
 
     can enter with AppRoot entry {
+        # find self and latest resume
         uid = security.token_to_user_id(self.token);
         if uid == "" { report {"error":"unauthorized"}; disengage; }
 
@@ -27,6 +28,7 @@ walker: pub GeneratePitch {
         for rr in [-->] :Role { if rr.role_id == self.role_id { role = rr; } }
         if role is null { report {"error":"role_not_found"}; disengage; }
 
+        # AI prompt
         prompt = "Generate a " + self.length + " " + self.style + " elevator pitch.\n"
                + "Candidate: " + me.name + "\n"
                + "Role: " + role.title + "\n"
@@ -35,6 +37,7 @@ walker: pub GeneratePitch {
 
         content = llm.llm_generate(prompt);
 
+        # Output
         aid = security.fake_uuid("a");
         art = Artifact(
             artifact_id=aid,
@@ -52,6 +55,7 @@ walker: pub GeneratePitch {
         report {"artifact_id": aid, "content": art.content, "structured": art.structured};
     }
 }
+
 
 walker: pub RewriteResumeForRole {
     has token: str;

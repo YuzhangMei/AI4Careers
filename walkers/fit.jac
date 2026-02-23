@@ -1,4 +1,5 @@
 # walkers/fit.jac
+# fit scoring system
 import schema.graph_schema;
 import utils.security;
 
@@ -7,6 +8,7 @@ walker: pub FitScoreRole {
     has role_id: str;
 
     can enter with AppRoot entry {
+        # Find myself and my latest resume
         uid = security.token_to_user_id(self.token);
         if uid == "" { report {"error":"unauthorized"}; disengage; }
 
@@ -30,6 +32,7 @@ walker: pub FitScoreRole {
         if role is null { report {"error":"role_not_found"}; disengage; }
 
         # MVP: extremely simple matching: overlap between resume skills and role.tags (or keywords from description)
+        # To be advanced in the future
         role_keywords: list[str] = role.tags;
         if len(role_keywords) == 0 { role_keywords = ["Python", "SQL"]; } # fallback
 
@@ -42,7 +45,7 @@ walker: pub FitScoreRole {
         }
 
         # score heuristic
-        score = int(100 * len(matched) / max(1, len(role_keywords)));
+        score = 100 * len(matched) / max(1, len(role_keywords));
 
         fit_id = security.fake_uuid("fit");
         fs = FitScore(

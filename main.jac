@@ -7,6 +7,7 @@ import walkers.career_fair;
 import walkers.fit;
 import walkers.generate;
 
+# Initialize AppRoot
 walker: pub Init {
     can enter {
         root = AppRoot();
@@ -15,6 +16,7 @@ walker: pub Init {
     }
 }
 
+# Admin Seeding (upload csv in the future)
 walker: pub SeedDemoData {
     can enter with AppRoot entry {
         e = Event(event_id="ev_1", name="UMich Winter Career Fair", term="Winter 2026",
