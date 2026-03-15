@@ -100,5 +100,22 @@ export const uploadResume = async (token, filename, raw_text) => {
   return { error: 'Resume upload failed' };
 };
 
+export const chatWithAI = async (token, question, history, event_id = 'evt_umich_fall_2025') => {
+  const response = await api.post('/walker/ChatWithAI', {
+    token,
+    question,
+    history,
+    event_id,
+  });
+
+  const jacResponse = response.data;
+  if (jacResponse.ok && jacResponse.data.reports && jacResponse.data.reports.length > 0) {
+    return jacResponse.data.reports[0];
+  }
+
+  return { error: 'AI chat failed' };
+};
+
+
 
 export default api;

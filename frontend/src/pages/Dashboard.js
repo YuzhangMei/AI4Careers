@@ -59,6 +59,9 @@ function Dashboard() {
               <button className="btn-action">Browse Companies</button>
               <button className="btn-action">View Career Fairs</button>
               <button className="btn-action">Update Preferences</button>
+              <button className="btn-action" onClick={() => navigate('/chat')}>
+                Chat With AI
+              </button>
             </div>
           </div>
 

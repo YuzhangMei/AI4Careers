@@ -2,7 +2,7 @@
 import from db { get_all_events, get_companies, get_company, get_roles }
 
 walker:pub ListEvents {
-    can list_events with `root entry {
+    can list_events with Root entry {
         events = get_all_events();
         report events;
     }

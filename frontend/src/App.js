@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import ResumeUpload from './pages/ResumeUpload';
+import ChatWithAI from './pages/ChatWithAI';
 import './App.css';
 
 function App() {
@@ -28,6 +29,14 @@ function App() {
             element={
               <PrivateRoute>
                 <ResumeUpload />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/chat"
+            element={
+              <PrivateRoute>
+                <ChatWithAI />
               </PrivateRoute>
             }
           />

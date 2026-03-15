@@ -4,7 +4,7 @@ import from auth { Signup, Login }
 import from profile { Me, UpdatePreferences }
 import from resume { ResumeUpload, GetResume }
 import from career_fair { ListEvents, ListCompanies, GetCompany, ListRoles }
-
+import from ai_chat { ChatWithAI }
 # Note: Walkers are automatically exposed as REST API endpoints at /walker/WalkerName
 # Example endpoints:
 # POST http://localhost:8000/walker/Signup  { "email": "...", "password": "...", "name": "..." }
