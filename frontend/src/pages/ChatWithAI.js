@@ -1,7 +1,28 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useAuth } from '../context/AuthContext';
 import { chatWithAI } from '../services/api';
+
+function normalizeAssistantMarkdown(text) {
+    if (typeof text !== 'string') return String(text ?? '');
+
+    let t = text.trim();
+
+    // 如果模型把 markdown 包在 ```markdown ... ``` 里，去掉外层代码围栏
+    const fenceMatch = t.match(/^```(?:markdown|md)?\s*([\s\S]*?)\s*```$/i);
+    if (fenceMatch) {
+        t = fenceMatch[1].trim();
+    }
+
+    // 处理常见转义：\#\#、\*\*、\n
+    t = t
+        .replace(/\\([#*_`[\]()])/g, '$1')
+        .replace(/\\n/g, '\n');
+
+    return t;
+}
 
 function ChatWithAI() {
     const navigate = useNavigate();
@@ -18,13 +39,9 @@ function ChatWithAI() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const handleSend = async (e) => {
-        e.preventDefault();
-
+    const sendMessage = async () => {
         const question = input.trim();
-        if (!question || loading) {
-            return;
-        }
+        if (!question || loading) return;
 
         const nextMessages = [...messages, { role: 'user', content: question }];
         setMessages(nextMessages);
@@ -39,17 +56,32 @@ function ChatWithAI() {
                 throw new Error(result.details || result.error);
             }
 
+            const rawAnswer = result.answer || 'I could not generate a response.';
+            const normalizedAnswer = normalizeAssistantMarkdown(rawAnswer);
+
             setMessages([
                 ...nextMessages,
                 {
                     role: 'assistant',
-                    content: result.answer || 'I could not generate a response.',
+                    content: normalizedAnswer,
                 },
             ]);
         } catch (err) {
             setError(err.message || 'Failed to talk to AI.');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        await sendMessage();
+    };
+
+    const handleKeyDown = async (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            await sendMessage();
         }
     };
 
@@ -83,7 +115,17 @@ function ChatWithAI() {
                             className={`chat-bubble ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-assistant'}`}
                         >
                             <div className="chat-role">{msg.role === 'user' ? 'You' : 'AI'}</div>
-                            <div className="chat-content">{msg.content}</div>
+                            <div className="chat-content">
+                                {msg.role === 'assistant' ? (
+                                    <div className="chat-markdown">
+                                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                            {normalizeAssistantMarkdown(msg.content)}
+                                        </ReactMarkdown>
+                                    </div>
+                                ) : (
+                                    <div className="chat-plain">{msg.content}</div>
+                                )}
+                            </div>
                         </div>
                     ))}
 
@@ -97,10 +139,11 @@ function ChatWithAI() {
 
                 {error && <div className="error-message">{error}</div>}
 
-                <form className="chat-input-bar" onSubmit={handleSend}>
+                <form className="chat-input-bar" onSubmit={handleSubmit}>
                     <textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
+                        onKeyDown={handleKeyDown}
                         placeholder="Try /match, /optimize, /pitch, or ask a normal question..."
                         rows={3}
                     />
