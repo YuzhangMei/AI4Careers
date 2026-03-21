@@ -86,7 +86,7 @@ function Signup() {
           <div className="form-group">
             <label htmlFor="confirmPassword">Confirm Password</label>
             <input
-              type="confirmPassword"
+              type="password"
               id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

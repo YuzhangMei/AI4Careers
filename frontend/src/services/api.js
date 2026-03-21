@@ -90,7 +90,12 @@ export const getCompany = async (event_id, company_id) => {
     event_id,
     company_id,
   });
-  return response.data;
+  // return response.data;
+  const jacResponse = response.data;
+  if (jacResponse.ok && jacResponse.data.reports && jacResponse.data.reports.length > 0) {
+    return jacResponse.data.reports[0];
+  }
+  return { error: 'Failed to fetch company details' };
 };
 
 export const uploadResume = async (token, filename, raw_text, pdf_data = '') => {

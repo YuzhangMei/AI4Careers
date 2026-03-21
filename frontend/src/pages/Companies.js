@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { listCompanies } from '../services/api';
+import { listCompanies, getCompany } from '../services/api';
 
 const EVENT_ID = 'evt_umich_fall_2025';
 
@@ -162,6 +162,8 @@ function Companies() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
+  const [modalLoading, setModalLoading] = useState(false);
+
 
   useEffect(() => {
     listCompanies({
@@ -184,6 +186,21 @@ function Companies() {
       c.description?.toLowerCase().includes(q)
     );
   }, [companies, search]);
+
+  const handleCompanyClick = async (company) => {
+    setModalLoading(true);
+    setError('');
+    try {
+      const detail = await getCompany(EVENT_ID, company.company_id);
+      if (detail.error) throw new Error(detail.error);
+      setSelected(detail);
+    } catch {
+      setError('Failed to load company details.');
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
 
   return (
     <div className="dashboard-container">
@@ -233,12 +250,18 @@ function Companies() {
               gap: '16px',
             }}>
               {filtered.map(c => (
-                <CompanyCard key={c.company_id} company={c} onClick={() => setSelected(c)} />
+                <CompanyCard key={c.company_id} company={c} onClick={() => handleCompanyClick(c)} />
               ))}
             </div>
           </>
         )}
       </div>
+
+      {modalLoading && (
+        <div style={{ position: 'fixed', bottom: 20, right: 20, background: '#fff', padding: '10px 14px', borderRadius: 8, boxShadow: '0 2px 10px rgba(0,0,0,0.12)' }}>
+          Loading company details...
+        </div>
+      )}
 
       {selected && <CompanyModal company={selected} onClose={() => setSelected(null)} />}
     </div>
