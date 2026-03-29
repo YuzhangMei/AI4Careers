@@ -14,6 +14,8 @@ import from matching {
     render_single_match_text
 }
 
+import from visual_match { identify_company_name_from_image }
+
 import from security { token_to_user_id }
 
 glob DEFAULT_EVENT_ID: str = "evt_umich_fall_2025";
@@ -212,6 +214,8 @@ walker:pub ChatWithAI {
     has question: str;
     has history: list = [];
     has event_id: str = DEFAULT_EVENT_ID;
+    has image_data: str = "";
+    has image_mime_type: str = "image/jpeg";
 
     can chat with Root entry {
         uid = token_to_user_id(self.token);
@@ -228,6 +232,85 @@ walker:pub ChatWithAI {
         ql = q.lower();
 
         try {
+            # Auto-route image-only input to /visual
+            if self.image_data.strip() != "" and not ql.startswith("/visual") {
+                q = "/visual " + q;
+                ql = q.lower();
+            }
+
+            # /visual -> identify company from uploaded image, then return single-company fit
+            if ql.startswith("/visual") {
+                if self.image_data.strip() == "" {
+                    report {
+                        "answer": "Please upload a company logo image to use /visual.",
+                        "mode": "visual"
+                    };
+                    return;
+                }
+
+                visual_result = identify_company_name_from_image(
+                    self.image_data, self.image_mime_type, self.event_id
+                );
+
+                if "error" in visual_result {
+                    if visual_result["error"] == "missing_openai_api_key" {
+                        report {
+                            "error": "visual_failed",
+                            "details": "OPENAI_API_KEY is not configured for image identification."
+                        };
+                        return;
+                    }
+
+                    if visual_result["error"] == "company_not_found" {
+                        report {
+                            "answer": "I couldn't confidently identify a company from that image within the current career fair database. Please try a clearer logo photo or type /match [company name].",
+                            "mode": "visual"
+                        };
+                        return;
+                    }
+
+                    report {"error": "visual_failed", "details": visual_result["error"]};
+                    return;
+                }
+
+                detected_company_name = visual_result["company_name"];
+
+                single_result = find_company_match_for_user(
+                    uid, self.event_id, detected_company_name
+                );
+
+                if "error" in single_result {
+                    if single_result["error"] == "no_resume" {
+                        report {
+                            "answer": "I couldn't find a resume for you yet. Please upload a resume PDF first, then try /visual again.",
+                            "mode": "visual"
+                        };
+                        return;
+                    }
+
+                    report {
+                        "error": "visual_match_failed",
+                        "details": single_result["error"]
+                    };
+                    return;
+                }
+
+                company_result = single_result["match"];
+                answer = (
+                    "Detected company: **" + detected_company_name + "**\n\n" + render_single_match_text(
+                        company_result
+                    )
+                );
+
+                report {
+                    "answer": answer,
+                    "mode": "visual",
+                    "detected_company_name": detected_company_name,
+                    "match": company_result
+                };
+                return;
+            }
+
             # /match -> either rank all companies or show one specific company
             if ql.startswith("/match") {
                 extra = q[6:].strip();

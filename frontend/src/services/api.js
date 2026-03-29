@@ -141,12 +141,21 @@ export const deleteResume = async (token, resume_id) => {
   return { error: 'Delete failed' };
 };
 
-export const chatWithAI = async (token, question, history, event_id = 'evt_umich_fall_2025') => {
+export const chatWithAI = async (
+  token,
+  question,
+  history,
+  event_id = 'evt_umich_fall_2025',
+  image_data = '',
+  image_mime_type = ''
+) => {
   const response = await api.post('/walker/ChatWithAI', {
     token,
     question,
     history,
     event_id,
+    image_data,
+    image_mime_type,
   });
 
   const jacResponse = response.data;

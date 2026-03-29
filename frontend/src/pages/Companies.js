@@ -12,27 +12,49 @@ function sponsorSummary(sponsorship) {
     return { label: 'Check Details', color: '#dd6b20' };
   }
 
-  const normalized = sponsorship.map((item) => item.trim().toLowerCase());
+  const text = sponsorship
+    .map((item) => String(item).trim().toLowerCase())
+    .join(' ');
 
-  const hasNoSponsorship = normalized.includes(
+  const hasNoSponsorship = text.includes(
     'authorized to work in the united states and will not require future sponsorship'
   );
 
-  const hasFutureVisa = normalized.some((item) =>
-    item.startsWith('work visa that will require future sponsorship')
+  const hasFutureVisa = text.includes(
+    'work visa that will require future sponsorship (e.g., opt, cpt, j1, etc.)'
   );
 
   if (hasNoSponsorship && hasFutureVisa) {
     return { label: 'Sponsors Visas', color: '#38a169' };
   }
 
-  if (hasNoSponsorship && !hasFutureVisa && normalized.length === 1) {
+  if (hasNoSponsorship && !hasFutureVisa) {
     return { label: 'No Sponsorship', color: '#e53e3e' };
   }
 
   return { label: 'Check Details', color: '#dd6b20' };
 }
 
+function regionLabel(region) {
+  if (region === 'Remote work opportunities may be available') {
+    return 'Remote';
+  }
+  return region;
+}
+
+function regionOrder(region) {
+  const order = {
+    Midwest: 1,
+    Northeast: 2,
+    Southeast: 3,
+    Southwest: 4,
+    West: 5,
+    'Remote work opportunities may be available': 6,
+    'Outside of the U.S.': 7,
+  };
+
+  return order[region] ?? 999;
+}
 
 
 function FilterChip({ label, active, onClick }) {
@@ -335,9 +357,18 @@ function Companies() {
 
   const allRegions = useMemo(() => {
     const set = new Set();
-    companies.forEach(c => c.regions?.forEach(r => set.add(r)));
-    return ['All', ...Array.from(set).sort()];
+    companies.forEach((c) => c.regions?.forEach((r) => set.add(r)));
+
+    return [
+      'All',
+      ...Array.from(set).sort((a, b) => {
+        const orderDiff = regionOrder(a) - regionOrder(b);
+        if (orderDiff !== 0) return orderDiff;
+        return a.localeCompare(b);
+      }),
+    ];
   }, [companies]);
+
 
   const hasActiveFilters = filterDays.length > 0 || filterSponsorships.length > 0 || filterPositions.length > 0 || filterRegions.length > 0 || search !== '';
 
@@ -443,8 +474,13 @@ function Companies() {
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>
             <span style={{ fontSize: '0.8rem', color: '#718096', fontWeight: 600, minWidth: '90px' }}>Region:</span>
-            {allRegions.filter(r => r !== 'All').map(r => (
-              <FilterChip key={r} label={r} active={filterRegions.includes(r)} onClick={() => toggle(setFilterRegions)(r)} />
+            {allRegions.filter((r) => r !== 'All').map((r) => (
+              <FilterChip
+                key={r}
+                label={regionLabel(r)}
+                active={filterRegions.includes(r)}
+                onClick={() => toggle(setFilterRegions)(r)}
+              />
             ))}
           </div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', alignItems: 'center' }}>

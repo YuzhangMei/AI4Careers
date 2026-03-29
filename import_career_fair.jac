@@ -30,7 +30,33 @@ def _safe_str(value) -> str {
     return str(value).strip();
 }
 
-def _split_multi(value) -> list[str] {
+def _split_csv_like(value) -> list[str] {
+    text = _safe_str(value);
+    if text == "" {
+        return [];
+    }
+
+    if "\n" in text {
+        parts = text.split("\n");
+    } elif "|" in text {
+        parts = text.split("|");
+    } elif ";" in text {
+        parts = text.split(";");
+    } else {
+        parts = text.split(",");
+    }
+
+    cleaned: list[str] = [];
+    for part in parts {
+        item = _safe_str(part);
+        if item != "" and item not in cleaned {
+            cleaned.append(item);
+        }
+    }
+    return cleaned;
+}
+
+def _split_sponsorship(value) -> list[str] {
     text = _safe_str(value);
     if text == "" {
         return [];
@@ -76,10 +102,10 @@ def _normalize_url(value) -> str {
 }
 
 def _make_role_titles(row: dict) -> list[dict] {
-    role_titles = _split_multi(row["role_titles"]);
-    positions = _split_multi(row["positions_recruited"]);
-    sponsorship_list = _split_multi(row["work_authorization_sponsorship"]);
-    regions = _split_multi(row["regions_recruited"]);
+    role_titles = _split_csv_like(row["role_titles"]);
+    positions = _split_csv_like(row["positions_recruited"]);
+    sponsorship_list = _split_sponsorship(row["work_authorization_sponsorship"]);
+    regions = _split_csv_like(row["regions_recruited"]);
 
     sponsorship_value = "Unknown";
     if len(sponsorship_list) > 0 {
@@ -98,7 +124,7 @@ def _make_role_titles(row: dict) -> list[dict] {
                     "work_mode": "",
                     "sponsorship": sponsorship_value,
                     "description": _safe_str(row["description"]),
-                    "tags": positions + _split_multi(row["degree_levels_recruited"])
+                    "tags": positions + _split_csv_like(row["degree_levels_recruited"])
                 }
             );
         }
@@ -114,7 +140,7 @@ def _make_role_titles(row: dict) -> list[dict] {
                 "work_mode": "",
                 "sponsorship": sponsorship_value,
                 "description": _safe_str(row["description"]),
-                "tags": _split_multi(row["degree_levels_recruited"])
+                "tags": _split_csv_like(row["degree_levels_recruited"])
             }
         );
     }
@@ -182,13 +208,15 @@ def import_career_fair(csv_path: str) -> dict {
                         _normalize_url(row["website"]),
                         _normalize_url(row["company_careers_website"]),
                         _safe_str(row["description"]),
-                        json.dumps(_split_multi(row["positions_recruited"])),
-                        json.dumps(_split_multi(row["degree_levels_recruited"])),
-                        json.dumps(_split_multi(row["academic_years_recruited"])),
-                        json.dumps(_split_multi(row["degrees_majors_recruited"])),
-                        json.dumps(_split_multi(row["work_authorization_sponsorship"])),
+                        json.dumps(_split_csv_like(row["positions_recruited"])),
+                        json.dumps(_split_csv_like(row["degree_levels_recruited"])),
+                        json.dumps(_split_csv_like(row["academic_years_recruited"])),
+                        json.dumps(_split_csv_like(row["degrees_majors_recruited"])),
+                        json.dumps(
+                            _split_sponsorship(row["work_authorization_sponsorship"])
+                        ),
                         _safe_str(row["work_authorization_notes"]),
-                        json.dumps(_split_multi(row["regions_recruited"])),
+                        json.dumps(_split_csv_like(row["regions_recruited"])),
                         1 if _to_bool(row["accept_hardcopy_resumes"]) else 0
                     )
                 );

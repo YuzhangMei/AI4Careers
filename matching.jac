@@ -351,26 +351,25 @@ def overlap_ratio(left: list, right: list) -> float {
 }
 
 def classify_sponsorship(sponsorship: list) -> str {
-    normalized: list[str] = unique_lower_list(sponsorship);
-
-    has_no: bool = (
-        "authorized to work in the united states and will not require future sponsorship" in normalized
-    );
-    has_future: bool = False;
-
-    for item in normalized {
-        item_text: str = str(item);
-        if item_text.startswith("work visa that will require future sponsorship") {
-            has_future = True;
-            break;
-        }
+    if len(sponsorship) == 0 {
+        return "Check Details";
     }
 
-    if has_no and has_future {
+    text: str = normalize_text(join_list(sponsorship, " "));
+
+    has_no: bool = (
+        "authorized to work in the united states and will not require future sponsorship" in text
+    );
+
+    has_yes: bool = (
+        "work visa that will require future sponsorship (e.g opt cpt j1 etc)" in text
+    );
+
+    if has_no and has_yes {
         return "Sponsors Visas";
     }
 
-    if has_no and not has_future and len(normalized) == 1 {
+    if has_no and not has_yes {
         return "No Sponsorship";
     }
 
