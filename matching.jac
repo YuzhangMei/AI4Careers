@@ -805,7 +805,7 @@ def rank_companies_for_user(user_id: str, event_id: str) -> dict {
         ranked = insert_sorted_by_score(ranked, scored);
     }
 
-    return {"matches": slice_list(ranked, 10), "total_companies_scored": len(ranked)};
+    return {"matches": ranked, "total_companies_scored": len(ranked)};
 }
 
 def find_company_match_for_user(

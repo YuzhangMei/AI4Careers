@@ -369,13 +369,14 @@ walker:pub ChatWithAI {
                 }
 
                 matches = result["matches"];
+                top10 = matches[:10];
                 formatter = MatchFormatter();
-                answer = formatter.render(json.dumps(matches));
+                answer = formatter.render(json.dumps(top10));
 
                 report {
                     "answer": answer,
                     "mode": "match",
-                    "matches": matches,
+                    "matches": top10,
                     "total_companies_scored": result["total_companies_scored"]
                 };
                 return;
