@@ -176,7 +176,7 @@ obj MatchFormatter {
 sem MatchFormatter.render = "You are formatting pre-ranked career fair company matches for a student. IMPORTANT: Do not change the ranking, do not invent companies, and do not change the provided scores. Use the companies exactly in the given order. Return markdown. Start with a short 1-2 sentence intro, then list all 10 companies. For each company include: 1) company name as a heading, 2) Score in the format 'Score: X/10', 3) Roles, 4) Location, 5) Why Fit as bullet points using the provided why_fit and matched_skills, 6) Action Plan as bullet points using the provided action_plan, 7) Details including sponsorship label, degree levels, and majors. Keep it concise but informative.";
 sem MatchFormatter.render.top_matches_json = "JSON list of the top 10 pre-scored companies, already ranked best to worst.";
 
-sem CareerFairAssistant.answer = "You are an AI career fair assistant for a University of Michigan student. Answer naturally and helpfully. Use tools before making claims about the student's resume or the career fair database. If asked for the best-fit companies, compare the student's resume, profile, locations, sponsorship needs, and company/role information, then recommend a few concrete companies with reasons. If resume data is missing, say so clearly and ask the user to upload one.";
+sem CareerFairAssistant.answer = "You are an AI career fair assistant for a University of Michigan student. Answer naturally, conversationally, and helpfully. Support both normal chat and structured career-fair tasks. If the user is greeting you, making small talk, asking a general question, or seeking advice, respond directly in natural language and do not force the interaction into command mode or list slash-commands unless the user asks. Use tools before making claims about the student's resume or the career fair database. If asked for the best-fit companies, compare the student's resume, profile, locations, sponsorship needs, and company/role information, then recommend a few concrete companies with reasons. If resume data is missing, say so clearly and ask the user to upload one.";
 sem CareerFairAssistant.answer.question = "The user's newest chat message.";
 sem CareerFairAssistant.answer.history_text = "Conversation history formatted as plain text, oldest to newest.";
 
@@ -209,6 +209,28 @@ def history_to_text(history: list) -> str {
     return "\n".join(lines);
 }
 
+def casual_reply(query: str) -> str {
+    q = query.strip().lower();
+
+    if q in ["hi", "hello", "hey", "hi!", "hello!", "hey!"] {
+        return "Hi! I'm doing well and ready to help. You can chat with me naturally about career fair prep, resumes, companies, or recruiting strategy.";
+    }
+
+    if q in ["how are you", "how are you?", "how are you doing", "how are you doing?"] {
+        return "I'm doing well, thanks for asking. I'm here to help with career fair prep, company fit, resumes, or whatever you'd like to talk through.";
+    }
+
+    if q in ["thanks", "thank you", "thanks!", "thank you!"] {
+        return "You're welcome! If you'd like, we can keep going with company matching, resume edits, pitch prep, or any quick career fair questions.";
+    }
+
+    if q in ["bye", "goodbye", "bye!", "goodbye!", "see you", "see you!"] {
+        return "Bye! Good luck with the career fair, and feel free to come back anytime if you want help preparing.";
+    }
+
+    return "";
+}
+
 walker:pub ChatWithAI {
     has token: str;
     has question: str;
@@ -236,6 +258,12 @@ walker:pub ChatWithAI {
             if self.image_data.strip() != "" and not ql.startswith("/visual") {
                 q = "/visual " + q;
                 ql = q.lower();
+            }
+
+            casual = casual_reply(q);
+            if casual != "" and self.image_data.strip() == "" and not ql.startswith("/") {
+                report {"answer": casual, "mode": "chat"};
+                return;
             }
 
             # /visual -> identify company from uploaded image, then return single-company fit

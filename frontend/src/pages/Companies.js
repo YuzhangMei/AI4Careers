@@ -330,6 +330,11 @@ function Companies() {
   const [filterRegions, setFilterRegions] = useState([]);
 
   useEffect(() => {
+    if (!user?.email) return;
+    window.localStorage.setItem(`dashboard-companies-visited:${user.email}`, 'true');
+  }, [user?.email]);
+
+  useEffect(() => {
     listCompanies({ event_id: EVENT_ID, fair_day: '', position_type: '', sponsors: '', region: '', major_search: '' })
       .then(data => {
         const sorted = (Array.isArray(data) ? data : []).sort((a, b) => a.name.localeCompare(b.name));

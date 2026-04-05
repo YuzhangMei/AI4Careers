@@ -248,17 +248,74 @@ body {
 .checklist {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
-.checklist li {
-  padding: 10px 0;
-  color: #666;
-  font-size: 16px;
-  border-bottom: 1px solid #eee;
+.checklist-progress {
+  margin: -2px 0 14px;
+  color: #718096;
+  font-size: 0.92rem;
+  font-weight: 600;
 }
 
-.checklist li:last-child {
-  border-bottom: none;
+.checklist-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 4px 0;
+}
+
+.checklist-marker-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 0 0 24px;
+}
+
+.checklist-marker {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 2px solid #cbd5e0;
+  background: #fff;
+  color: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0;
+  cursor: default;
+  box-sizing: border-box;
+}
+
+.checklist-step-done .checklist-marker {
+  border-color: #3182ce;
+  background: #3182ce;
+  color: #fff;
+}
+
+.checklist-step-interactive .checklist-marker {
+  cursor: pointer;
+}
+
+.checklist-line {
+  width: 2px;
+  min-height: 18px;
+  margin-top: 5px;
+  background: #e2e8f0;
+  border-radius: 999px;
+}
+
+.checklist-copy {
+  padding-top: 1px;
+}
+
+.checklist-label {
+  color: #2d3748;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 .loading {

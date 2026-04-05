@@ -31,7 +31,8 @@ function ChatWithAI() {
     const [messages, setMessages] = useState([
         {
             role: 'assistant',
-            content: "Hi! I'm your AI career coach. Here's what I can do:\n\n**/match** → rank all companies by fit with your resume\n\n**/match [company]** → score your fit with one specific company\n\n**/pitch** → generate a tailored elevator pitch for a company\n\n**/optimize** → polish and strengthen your resume text\n\n**/visual** → upload a company logo to identify it and score your fit\n\nYou can also upload an image directly without any command and I'll treat it as /visual.\n\nOr just ask me anything — sponsorship, locations, majors, how to prioritize the fair, and more.",
+            content: "Hi! I'm your AI career coach. You can chat with me naturally about career fair prep, resumes, companies, sponsorship, or recruiting strategy.\n\nIf you want structured tools, you can also use:\n\n**/match** → rank all companies by fit with your resume\n\n**/match [company]** → score your fit with one specific company\n\n**/pitch** → generate a tailored elevator pitch for a company\n\n**/optimize** → polish and strengthen your resume text\n\n**/visual** → upload a company logo to identify it and score your fit\n\nYou can also upload an image directly without any command and I'll treat it as /visual.",
+            sendToBackend: false,
         },
     ]);
     const [input, setInput] = useState('');
@@ -57,6 +58,9 @@ function ChatWithAI() {
             : question;
 
         const nextMessages = [...messages, { role: 'user', content: userMessageText }];
+        const backendHistory = nextMessages
+            .filter((msg) => msg.sendToBackend !== false)
+            .map(({ role, content }) => ({ role, content }));
         setMessages(nextMessages);
         setInput('');
         setLoading(true);
@@ -66,7 +70,7 @@ function ChatWithAI() {
             const result = await chatWithAI(
                 token,
                 question,
-                nextMessages,
+                backendHistory,
                 'evt_umich_fall_2025',
                 selectedImageBase64,
                 selectedImageMime

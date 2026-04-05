@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -61,6 +61,112 @@ function PrefsDisplay({ preferences }) {
 function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const companiesVisitedKey = `dashboard-companies-visited:${user?.email ?? 'anonymous'}`;
+  const fitScoresOverrideKey = `dashboard-fit-scores-override:${user?.email ?? 'anonymous'}`;
+  const [savedProgress, setSavedProgress] = useState({
+    accountCreated: true,
+    resumeUploaded: false,
+    preferencesSet: false,
+    browsedCompanies: false,
+    fitScoresViewed: false,
+  });
+
+  useEffect(() => {
+    if (!user?.email) return;
+    const hasPreferences = !!(
+      user?.preferences?.work_authorization?.length ||
+      user?.preferences?.preferred_locations?.length ||
+      user?.preferences?.work_modes?.length ||
+      user?.preferences?.role_types?.length
+    );
+
+    const hasVisitedCompanies = window.localStorage.getItem(companiesVisitedKey) === 'true';
+    const fitScoresOverride = window.localStorage.getItem(fitScoresOverrideKey);
+
+    setSavedProgress((prev) => ({
+      ...prev,
+      accountCreated: true,
+      resumeUploaded: (user?.resume_count ?? 0) > 0,
+      preferencesSet: hasPreferences,
+      browsedCompanies: hasVisitedCompanies,
+      fitScoresViewed: fitScoresOverride == null ? hasVisitedCompanies : fitScoresOverride === 'true',
+    }));
+  }, [
+    companiesVisitedKey,
+    fitScoresOverrideKey,
+    user?.email,
+    user?.preferences?.preferred_locations?.length,
+    user?.preferences?.role_types?.length,
+    user?.preferences?.work_authorization?.length,
+    user?.preferences?.work_modes?.length,
+    user?.resume_count,
+  ]);
+
+  const updateProgress = (key, value) => {
+    setSavedProgress((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+
+    if (key === 'fitScoresViewed' && user?.email) {
+      window.localStorage.setItem(fitScoresOverrideKey, value ? 'true' : 'false');
+    }
+  };
+
+  const handleBrowseCompanies = () => {
+    if (user?.email) {
+      window.localStorage.setItem(companiesVisitedKey, 'true');
+    }
+    setSavedProgress((prev) => ({
+      ...prev,
+      browsedCompanies: true,
+    }));
+    navigate('/companies');
+  };
+
+  const handleOpenChat = () => {
+    navigate('/chat');
+  };
+
+  const onboardingSteps = [
+    {
+      key: 'account',
+      label: 'Create your account',
+      done: savedProgress.accountCreated,
+      interactive: true,
+      onToggle: () => setSavedProgress((prev) => ({ ...prev, accountCreated: !prev.accountCreated })),
+    },
+    {
+      key: 'resume',
+      label: 'Upload your resume',
+      done: savedProgress.resumeUploaded,
+      interactive: true,
+      onToggle: () => setSavedProgress((prev) => ({ ...prev, resumeUploaded: !prev.resumeUploaded })),
+    },
+    {
+      key: 'preferences',
+      label: 'Set your preferences',
+      done: savedProgress.preferencesSet,
+      interactive: true,
+      onToggle: () => setSavedProgress((prev) => ({ ...prev, preferencesSet: !prev.preferencesSet })),
+    },
+    {
+      key: 'browse',
+      label: 'Browse career fair companies',
+      done: savedProgress.browsedCompanies,
+      interactive: true,
+      onToggle: () => setSavedProgress((prev) => ({ ...prev, browsedCompanies: !prev.browsedCompanies })),
+    },
+    {
+      key: 'fit',
+      label: 'Get your fit scores',
+      done: savedProgress.fitScoresViewed,
+      interactive: true,
+      onToggle: () => updateProgress('fitScoresViewed', !savedProgress.fitScoresViewed),
+    },
+  ];
+
+  const completedSteps = onboardingSteps.filter((step) => step.done).length;
 
   if (!user) return <div className="loading">Loading...</div>;
 
@@ -128,19 +234,36 @@ function Dashboard() {
             }}>
               <button className="btn-action" onClick={() => navigate('/resume-upload')}>Upload Resume</button>
               <button className="btn-action" onClick={() => navigate('/profile')}>My Profile & Preferences</button>
-              <button className="btn-action" onClick={() => navigate('/companies')}>Career Fair Companies</button>
-              <button className="btn-action" onClick={() => navigate('/chat')}>Chat With AI</button>
+              <button className="btn-action" onClick={handleBrowseCompanies}>Career Fair Companies</button>
+              <button className="btn-action" onClick={handleOpenChat}>Chat With AI</button>
             </div>
           </div>
 
           <div className="card" style={{ minHeight: '400px' }}>
             <h3>Getting Started</h3>
+            <p className="checklist-progress">{completedSteps} of {onboardingSteps.length} completed</p>
             <ul className="checklist">
-              <li>✓ Create your account</li>
-              <li>{(user.resume_count ?? 0) > 0 ? '✓' : '⃝'} Upload your resume</li>
-              <li>{user.preferences?.work_modes?.length > 0 ? '✓' : '⃝'} Set your preferences</li>
-              <li>⃝ Browse career fair companies</li>
-              <li>⃝ Get your fit scores</li>
+              {onboardingSteps.map((step, index) => (
+                <li
+                  key={step.key}
+                  className={`checklist-step${step.done ? ' checklist-step-done' : ''}${step.interactive ? ' checklist-step-interactive' : ''}`}
+                >
+                  <div className="checklist-marker-wrap">
+                    <button
+                      type="button"
+                      className="checklist-marker"
+                      onClick={step.onToggle}
+                      aria-label={step.done ? `Mark ${step.label} incomplete` : `Mark ${step.label} complete`}
+                    >
+                      {step.done ? '✓' : ''}
+                    </button>
+                    {index < onboardingSteps.length - 1 && <div className="checklist-line" />}
+                  </div>
+                  <div className="checklist-copy">
+                    <div className="checklist-label">{step.label}</div>
+                  </div>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
