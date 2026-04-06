@@ -452,4 +452,4 @@ sqlite3 .jac/data/ai4careers.db "SELECT email, user_id FROM users;"
 
 ## License
 
-MIT
+University of Michigan EECS 449
