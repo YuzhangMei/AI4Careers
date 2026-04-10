@@ -1,6 +1,8 @@
 # AI4Careers
 
-AI-powered career fair assistant for University of Michigan students: explore employers, align your resume to roles, practice pitches, and get coached through an AI chat. The backend is written in **Jac**; the frontend is **React**.
+[![Built with Jaseci](https://img.shields.io/badge/Built%20with-Jaseci-111827?style=for-the-badge)](https://www.jaseci.org/)
+
+AI-powered career fair assistant for University of Michigan students: explore employers, align your resume to roles, practice pitches, and get coached through an AI chat. The backend is written in **Jac** built with **Jaseci**; the frontend is **React**.
 
 **Sample data**: UMich Fall 2025 Career Fair — Sept 22–23, 2025 (`evt_umich_fall_2025`)
 
@@ -545,3 +547,5 @@ Use a no-op in `except` blocks (e.g. assign to a dummy variable), not Python `pa
 ## License
 
 University of Michigan EECS 449
+
+This project is built with Jaseci.
