@@ -632,6 +632,8 @@ def score_company(resume: dict, user: dict, company: dict) -> dict {
             "company_id": str(company.get("company_id", "")) if isinstance(company, dict) else "",
             "name": str(company.get("name", "")) if isinstance(company, dict) else "",
             "score": 0.0,
+            "raw_score": 0.0,
+            "raw_score_0_1": 0.0,
             "score_breakdown": {},
             "positions": [],
             "regions": [],
@@ -782,10 +784,15 @@ def score_company(resume: dict, user: dict, company: dict) -> dict {
 
     action_plan = build_action_plan(company, sponsorship_label, matched_skills);
 
+    raw_score_0_1: float = clamp01(company_fit_raw);
+    raw_score: float = round1(10.0 * raw_score_0_1);
+
     return {
         "company_id": company["company_id"],
         "name": company["name"],
-        "score": round1(10.0 * clamp01(company_fit_raw)),
+        "score": raw_score,
+        "raw_score": raw_score,
+        "raw_score_0_1": round4(raw_score_0_1),
         "score_breakdown": score_breakdown,
         "positions": company_positions,
         "regions": company_regions,
@@ -808,13 +815,68 @@ def score_company(resume: dict, user: dict, company: dict) -> dict {
 }
 
 
+def display_score_from_rank(rank_index: int, total: int) -> float {
+    if total <= 1 {
+        return 9.0;
+    }
+
+    percentile: float = 1.0 - (float(rank_index) / float(total - 1));
+
+    if percentile >= 0.9 {
+        return round1(9.0 + 0.5 * ((percentile - 0.9) / 0.1));
+    }
+
+    if percentile >= 0.6 {
+        return round1(7.5 + 1.5 * ((percentile - 0.6) / 0.3));
+    }
+
+    if percentile >= 0.3 {
+        return round1(6.2 + 1.3 * ((percentile - 0.3) / 0.3));
+    }
+
+    return round1(4.8 + 1.4 * (percentile / 0.3));
+}
+
+
+def apply_rank_normalized_scores(ranked: list) -> list {
+    calibrated: list = [];
+    total: int = len(ranked);
+    idx: int = 0;
+
+    for item in ranked {
+        if not isinstance(item, dict) {
+            idx += 1;
+            continue;
+        }
+
+        updated: dict = {};
+        for key in item {
+            updated[key] = item[key];
+        }
+
+        updated["score"] = display_score_from_rank(idx, total);
+        updated["rank_position"] = idx + 1;
+        updated["score_method"] = "rank_normalized";
+
+        calibrated.append(updated);
+        idx += 1;
+    }
+
+    return calibrated;
+}
+
+
 def insert_sorted_by_score(items: list, item: dict) -> list {
     result: list = [];
     inserted: bool = False;
-    item_score: float = float(item["score"]);
+    item_score: float = float(item["raw_score"]) if "raw_score" in item else float(
+        item["score"]
+    );
 
     for existing in items {
-        existing_score: float = float(existing["score"]);
+        existing_score: float = float(existing["raw_score"])
+            if "raw_score" in existing
+            else float(existing["score"]);
         if not inserted and item_score > existing_score {
             result.append(item);
             inserted = True;
@@ -856,38 +918,32 @@ def rank_companies_for_user(user_id: str, event_id: str) -> dict {
         ranked = insert_sorted_by_score(ranked, scored);
     }
 
+    ranked = apply_rank_normalized_scores(ranked);
+
     return {"matches": ranked, "total_companies_scored": len(ranked)};
 }
 
 def find_company_match_for_user(
     user_id: str, event_id: str, company_query: str
 ) -> dict {
-    user = get_user_by_id(user_id);
-    if user is None {
-        return {"error": "user_not_found"};
+    ranked_result = rank_companies_for_user(user_id, event_id);
+    if "error" in ranked_result {
+        return ranked_result;
     }
 
-    resume = get_latest_resume(user_id);
-    if resume is None {
-        return {"error": "no_resume"};
-    }
+    matches = ranked_result["matches"] if "matches" in ranked_result else [];
 
-    companies = get_companies_full(event_id);
-
-    for raw_company in companies {
-        if not isinstance(raw_company, dict) {
+    for company_result in matches {
+        if not isinstance(company_result, dict) {
             continue;
         }
-        company: dict = {};
-        for k in raw_company {
-            company[k] = raw_company[k];
-        }
 
-        company_name: str = str(company["name"]) if "name" in company else "";
+        company_name: str = str(company_result["name"])
+            if "name" in company_result
+            else "";
 
         if company_name_matches(company_name, company_query) {
-            scored = score_company(resume, user, company);
-            return {"match": scored, "matched_company_name": company_name};
+            return {"match": company_result, "matched_company_name": company_name};
         }
     }
 
