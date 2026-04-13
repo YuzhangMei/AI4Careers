@@ -3,31 +3,36 @@ import { useNavigate } from 'react-router-dom';
 
 const FEATURES = [
   {
-    icon: '🎯',
-    title: 'AI Company Matching',
-    desc: 'Upload your resume and get a ranked list of best-fit companies at the career fair — scored by skills, location, and sponsorship needs.',
-  },
-  {
     icon: '📄',
-    title: 'Resume Optimizer',
-    desc: 'AI rewrites your resume with strong action verbs and recruiter-friendly phrasing, without inventing anything.',
+    title: 'Resume Lab',
+    desc: 'Upload, edit, and tailor resumes to any job description — AI rewrites bullets and highlights every change.',
   },
   {
     icon: '🎤',
-    title: 'Elevator Pitch Generator',
-    desc: 'Get a polished 45-second pitch tailored to a specific company — plus a 20-second version and delivery tips.',
+    title: 'BQ & Interview Prep',
+    desc: 'Log experiences and generate STAR-format stories for any behavioral question.',
+  },
+  {
+    icon: '🏢',
+    title: 'Career Fair Browser',
+    desc: 'Browse companies, see fit scores ranked by your resume, and get a custom elevator pitch.',
+  },
+  {
+    icon: '🤖',
+    title: 'AI Career Chat',
+    desc: 'Cover letters, skill gap analysis, mock interviews — powered by your resume context.',
   },
   {
     icon: '📸',
-    title: 'Logo Scanner',
-    desc: 'Snap a photo of a company booth logo and instantly see your fit score and action plan for that company.',
+    title: 'Visual Recognition',
+    desc: 'Snap a company logo and instantly see your fit score and a conversation starter.',
   },
 ];
 
 const STEPS = [
-  { num: '1', title: 'Upload Your Resume', desc: 'Drop in your PDF and let AI extract your skills and experience.' },
-  { num: '2', title: 'Get Your Top Matches', desc: 'See which companies are the best fit for you, ranked and explained.' },
-  { num: '3', title: 'Walk In Confident', desc: 'Use your custom pitch and action plan to make every conversation count.' },
+  { num: '1', title: 'Upload Your Resume', desc: 'Drop in a PDF — AI parses your skills, experience, and projects in seconds.' },
+  { num: '2', title: 'Tailor & Optimize', desc: 'Pick a target role, paste the job description, and get a tailored resume instantly.' },
+  { num: '3', title: 'Prep & Apply', desc: 'Generate STAR stories, cover letters, elevator pitches — and walk into any interview ready.' },
 ];
 
 // Fade-in on scroll hook
@@ -76,12 +81,12 @@ function Landing() {
       {/* Hero */}
       <section className="landing-hero">
         <div className="landing-hero-inner">
-          <div className="landing-hero-badge">Built for University of Michigan Career Fair</div>
+          <div className="landing-hero-badge">Built for University of Michigan Students</div>
           <h1 className="landing-hero-title">
-            Your AI Career Fair<br />Companion
+            Your AI-Powered<br />Career Toolkit
           </h1>
           <p className="landing-hero-sub">
-            Match with top companies, optimize your resume, and ace your pitch — all before you walk in the door.
+            Tailor your resume, prep for behavioral interviews, match with top companies, and ace your pitch — all in one place.
           </p>
           <div className="landing-hero-ctas">
             <button className="landing-btn-solid landing-btn-lg landing-btn-hero" style={{ background: '#f5f0e8', color: '#1a1a18' }} onClick={() => navigate('/signup')}>
@@ -140,8 +145,8 @@ function Landing() {
 
       {/* CTA Banner */}
       <FadeSection className="landing-cta-banner">
-        <h2 className="landing-cta-title">Ready for the career fair?</h2>
-        <p className="landing-cta-sub">Join students who prep smarter with AI4Careers.</p>
+        <h2 className="landing-cta-title">Ready to land your next role?</h2>
+        <p className="landing-cta-sub">Join students who prepare smarter with AI4Careers.</p>
         <button className="landing-btn-solid landing-btn-lg landing-btn-hero" style={{ background: '#f5f0e8', color: '#1a1a18' }} onClick={() => navigate('/signup')}>
           Create Your Free Account →
         </button>
@@ -154,7 +159,8 @@ function Landing() {
           <span onClick={() => navigate('/login')} className="landing-footer-link">Log In</span>
           <span onClick={() => navigate('/signup')} className="landing-footer-link">Sign Up</span>
         </div>
-        <div className="landing-footer-copy">EECS 449 · University of Michigan · Built with Jaseci · © 2026 AI4Careers</div>
+        <div className="landing-footer-copy" style={{ marginBottom: 6 }}>EECS 449 · University of Michigan · Built with Jaseci · © 2026 AI4Careers</div>
+        <div className="landing-footer-copy" style={{ fontSize: 11, opacity: 0.6 }}>AI-generated content is for reference only. Please review all outputs before use.</div>
       </footer>
     </div>
   );

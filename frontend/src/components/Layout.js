@@ -149,7 +149,7 @@ export default function Layout({ children }) {
             })}
           </nav>
 
-          {/* Sign out */}
+          {/* Sign out + disclaimer */}
           <div style={{ padding: '12px', borderTop: '1px solid #d4caba' }}>
             <button
               onClick={handleLogout}
@@ -166,6 +166,7 @@ export default function Layout({ children }) {
               <LogOut size={16} style={{ flexShrink: 0 }} />
               Sign out
             </button>
+            <p style={{ fontSize: 10, color: '#b0a898', lineHeight: 1.4, margin: '8px 14px 0', whiteSpace: 'normal' }}>AI-generated content is for reference only. Please review all outputs before use.</p>
           </div>
         </aside>
 
